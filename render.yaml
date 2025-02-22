@@ -1,0 +1,38 @@
+services:
+  # Backend API Service
+  - type: web
+    name: kuroai-api
+    env: docker
+    region: frankfurt  # Choose the region closest to your users
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        sync: false  # Will be set manually in Render dashboard
+    healthCheckPath: /
+    numInstances: 1
+    buildCommand: docker build -t kuroai-api .
+    startCommand: docker run -p $PORT:8000 kuroai-api
+
+  # Frontend Service
+  - type: web
+    name: kuroai-frontend
+    env: docker
+    region: frankfurt
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false  # Will be set manually in Render dashboard
+    buildCommand: docker build -t kuroai-frontend .
+    startCommand: docker run -p $PORT:3000 kuroai-frontend
+    numInstances: 1
+
+databases:
+  - name: kuroai-db
+    region: frankfurt
+    plan: free  # Adjust based on needs
